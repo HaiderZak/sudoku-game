@@ -18,19 +18,20 @@ public class Sudoku extends Canvas implements Runnable, MouseListener {
 	private static final long serialVersionUID = -1969447397438808410L;
 	private boolean running;
 	private Thread thread;
-	KeyInput ki;
+	private KeyInput ki;
 	private int[][] arr;
 	private int[] selectedBox;
 	private boolean clicked = false;
 	private int blockWidth;
 	private int blockHeight;
 	private int[] pair;
-	List<List<Integer>> allPairs;
+	private List<List<Integer>> allPairs;
 	private boolean same = false;
 	private int[][] newArr; // temp board
 	private int i = 0;
 	private int checkValid = 0;
 	private BufferedImage image;
+	private List<List<Integer>> badIndex;
 	
 	public Sudoku() {
 		new Main(this);
@@ -56,7 +57,19 @@ public class Sudoku extends Canvas implements Runnable, MouseListener {
 			arr = new int[][] {{-1,-1,-1,-1,-1,-1,-1,-1,-1},{-1,-1,-1,-1,-1,-1,-1,-1,-1},{-1,-1,-1,-1,-1,-1,-1,-1,-1},
 							   {-1,-1,-1,-1,-1,-1,-1,-1,-1},{-1,-1,-1,-1,-1,-1,-1,-1,-1},{-1,-1,-1,-1,-1,-1,-1,-1,-1},
 							   {-1,-1,-1,-1,-1,-1,-1,-1,-1},{-1,-1,-1,-1,-1,-1,-1,-1,-1},{-1,-1,-1,-1,-1,-1,-1,-1,-1}};
+			badIndex = new ArrayList<List<Integer>>();
 			populateBoard();	
+			int c = 0;
+			for(int a=0; a<arr.length; a++) {
+				for(int b=0; b<arr.length; b++) {
+					if(arr[a][b] != -1) {
+						badIndex.add(new ArrayList<Integer>());
+						badIndex.get(c).add(a);
+						badIndex.get(c).add(b);
+						c++;
+					}
+				}
+			}
 		}
 	}
 	
@@ -185,6 +198,18 @@ public class Sudoku extends Canvas implements Runnable, MouseListener {
 
 	public void tick() {
 		if(gameState == STATE.PLAYING) {
+			List<Integer> newPair = new ArrayList<Integer>();
+			if(pair != null) {
+				newPair.add(pair[0]);
+				newPair.add(pair[1]);
+				if(badIndex.contains(newPair)) {
+					ki.setAllowed(false);
+				}
+				else {
+					ki.setAllowed(true);
+				}
+			}
+
 			newArr = new int[9][9];
 			for(int c=0; c<arr.length; c++) {
 				for(int d=0; d<arr.length; d++) {
@@ -211,6 +236,10 @@ public class Sudoku extends Canvas implements Runnable, MouseListener {
 				}
 				ki.setDelete(false);
 			}	
+			if(ki.getSolve()) {
+				solveSudoku();
+				ki.setSolve(false);
+			}
 		}
 	}
 	
@@ -265,6 +294,90 @@ public class Sudoku extends Canvas implements Runnable, MouseListener {
 		return true;
 	}
 
+    private boolean solveSudoku()
+    {
+        int row=0;
+        int col=0;
+        int[] a = numberUnassigned(row, col);
+        //if all cells are assigned then the sudoku is already solved
+        //pass by reference because number_unassigned will change the values of row and col
+        if(a[0] == 0)
+            return true;
+        //number between 1 to 9
+        row = a[1];
+        col = a[2];
+        for(int i=1;i<=9;i++)
+        {
+            //if we can assign i to the cell or not
+            //the cell is matrix[row][col]
+            if(isSafe(i, row, col))
+            {
+                arr[row][col] = i;
+                //backtracking
+                if(solveSudoku())
+                    return true;
+                //if we can't proceed with this solution
+                //reassign the cell
+                arr[row][col]=-1;
+            }
+        }
+        return false;
+    }
+	
+    private int[] numberUnassigned(int row, int col)
+    {
+        int numunassign = 0;
+        for(int i=0;i<9;i++)
+        {
+            for(int j=0;j<9;j++)
+            {
+                //cell is unassigned
+                if(arr[i][j] == -1)
+                {
+                    //changing the values of row and col
+                    row = i;
+                    col = j;
+                    //there is one or more unassigned cells
+                    numunassign = 1;
+                    int[] a = {numunassign, row, col};
+                    return a;
+                }
+            }
+        }
+        int[] a = {numunassign, -1, -1};
+        return a;
+    }
+	
+    private boolean isSafe(int n, int r, int c)
+    {
+        //checking in row
+        for(int i=0;i<9;i++)
+        {
+            //there is a cell with same value
+            if(arr[r][i] == n)
+                return false;
+        }
+        //checking column
+        for(int i=0;i<9;i++)
+        {
+            //there is a cell with the value equal to i
+            if(arr[i][c] == n)
+                return false;
+        }
+        //checking sub matrix
+        int row_start = (r/3)*3;
+        int col_start = (c/3)*3;
+        for(int i=row_start;i<row_start+3;i++)
+        {
+            for(int j=col_start;j<col_start+3;j++)
+            {
+                if(arr[i][j]==n)
+                    return false;
+            }
+        }
+        return true;
+    }
+	
 	public void render() {
 		BufferStrategy bs = this.getBufferStrategy();
 		if(bs == null) {
@@ -306,6 +419,26 @@ public class Sudoku extends Canvas implements Runnable, MouseListener {
 				j++;
 			}
 			
+			//Draw gray boxes 
+			
+			g.setColor(Color.LIGHT_GRAY);
+			for(int r=0; r<badIndex.size(); r++) {
+				if((badIndex.get(r).get(0) == 2 && badIndex.get(r).get(1) == 2) || (badIndex.get(r).get(0) == 5 && badIndex.get(r).get(1) == 2) || 
+						(badIndex.get(r).get(0) == 2 && badIndex.get(r).get(1) == 5) || (badIndex.get(r).get(0) == 5 && badIndex.get(r).get(1) == 5)) {
+					g.fillRect(badIndex.get(r).get(0) * blockWidth+1, badIndex.get(r).get(1) * blockHeight+1, blockWidth-2, blockHeight-2);		
+				}
+				else if(badIndex.get(r).get(1) == 2 || badIndex.get(r).get(1) == 5) {
+					g.fillRect(badIndex.get(r).get(0) * blockWidth+1, badIndex.get(r).get(1) * blockHeight+1, blockWidth-1, blockHeight-2);		
+				}
+				else if(badIndex.get(r).get(0) == 2 || badIndex.get(r).get(0) == 5) {
+					g.fillRect(badIndex.get(r).get(0) * blockWidth+1, badIndex.get(r).get(1) * blockHeight+1, blockWidth-2, blockHeight-1);		
+				}
+				else {
+					g.fillRect(badIndex.get(r).get(0) * blockWidth+1, badIndex.get(r).get(1) * blockHeight+1, blockWidth-1, blockHeight-1);		
+				}
+			}
+			
+			
 			// Draw selected boxes onto screen
 			g.setColor(Color.BLACK);
 			g.setFont(new Font("Arial", Font.PLAIN, 35)); 
@@ -314,29 +447,42 @@ public class Sudoku extends Canvas implements Runnable, MouseListener {
 				g.setColor(Color.GREEN);
 
 				if((pair[0] == 2 && pair[1] == 2) || (pair[0] == 5 && pair[1] == 2) || (pair[0] == 2 && pair[1] == 5) || (pair[0] == 5 && pair[1] == 5)) {
-					g.fillRect(pair[0] * blockWidth+1, pair[1] * blockHeight+1, blockWidth-2, blockHeight-2);		
+					g.drawRect(pair[0] * blockWidth+1, pair[1] * blockHeight+1, blockWidth-3, blockHeight-3);		
 					boxType = 1;
 				}
 				else if(pair[1] == 2 || pair[1] == 5) {
-					g.fillRect(pair[0] * blockWidth+1, pair[1] * blockHeight+1, blockWidth-1, blockHeight-2);		
+					g.drawRect(pair[0] * blockWidth+1, pair[1] * blockHeight+1, blockWidth-2, blockHeight-3);		
 					boxType = 2;
 				}
 				else if(pair[0] == 2 || pair[0] == 5) {
-					g.fillRect(pair[0] * blockWidth+1, pair[1] * blockHeight+1, blockWidth-2, blockHeight-1);		
+					g.drawRect(pair[0] * blockWidth+1, pair[1] * blockHeight+1, blockWidth-3, blockHeight-2);		
 					boxType = 3;
 				}
 				else {
-					g.fillRect(pair[0] * blockWidth+1, pair[1] * blockHeight+1, blockWidth-1, blockHeight-1);		
+					g.drawRect(pair[0] * blockWidth+1, pair[1] * blockHeight+1, blockWidth-2, blockHeight-2);		
 					boxType = 4;
 				}
 				
+				if(checkValid == 2) {
+					if(boxType == 1) {
+						g.fillRect(pair[0] * blockWidth+1, pair[1] * blockHeight+1, blockWidth-3, blockHeight-3);						
+					}
+					if(boxType == 2) {
+						g.fillRect(pair[0] * blockWidth+1, pair[1] * blockHeight+1, blockWidth-2, blockHeight-3);						
+					}
+					if(boxType == 3) {
+						g.fillRect(pair[0] * blockWidth+1, pair[1] * blockHeight+1, blockWidth-3, blockHeight-2);						
+					}
+					if(boxType == 4) {
+						g.fillRect(pair[0] * blockWidth+1, pair[1] * blockHeight+1, blockWidth-2, blockHeight-2);						
+					}
+				}
 				if(checkValid == 1) { // Not valid
 					if(same) {
 						g.setColor(Color.RED);
 					}
 					else {
 						g.setColor(Color.GREEN);
-						checkValid = 0;
 					}
 					if(boxType == 1) {
 						g.fillRect(pair[0] * blockWidth+1, pair[1] * blockHeight+1, blockWidth-2, blockHeight-2);							
@@ -359,17 +505,18 @@ public class Sudoku extends Canvas implements Runnable, MouseListener {
 				else {
 					ki.setNum("");
 					g.drawString(ki.getNum(), pair[0] * blockWidth + 29,  pair[1] * blockHeight + 42);	
+					checkValid = 0;
 					same = true;
 				}
 			}
-
+	
 			for(int row=0; row<9; row++) {
 				for(int col=0; col<9; col++) {
 					if(arr[row][col] != -1) {
 						g.drawString(arr[row][col] + "", row * blockWidth + 29,  col * blockHeight + 42);											
 					}
 				}
-			}	
+			}		
 		}
 		
 		g.dispose();
