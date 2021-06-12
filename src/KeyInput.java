@@ -56,7 +56,7 @@ public class KeyInput extends KeyAdapter{
 	
     public void keyPressed(KeyEvent e) {
         int key = e.getKeyCode();
-       
+        
         if(allowed) {
             if(key == KeyEvent.VK_9 || key == KeyEvent.VK_8 || key == KeyEvent.VK_7 || key == KeyEvent.VK_6 
             		|| key == KeyEvent.VK_5 || key == KeyEvent.VK_4 || key == KeyEvent.VK_3 || key == KeyEvent.VK_2 || key == KeyEvent.VK_1) {

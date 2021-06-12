@@ -32,6 +32,7 @@ public class Sudoku extends Canvas implements Runnable, MouseListener {
 	private int checkValid = 0;
 	private BufferedImage image;
 	private List<List<Integer>> badIndex;
+	private int[][] initialList;
 	
 	public Sudoku() {
 		new Main(this);
@@ -68,6 +69,12 @@ public class Sudoku extends Canvas implements Runnable, MouseListener {
 						badIndex.get(c).add(b);
 						c++;
 					}
+				}
+			}
+			initialList = new int[9][9];
+			for(int a=0; a<arr.length; a++) {
+				for(int b=0; b<arr.length; b++) {
+					initialList[a][b] = arr[a][b];
 				}
 			}
 		}
@@ -235,12 +242,14 @@ public class Sudoku extends Canvas implements Runnable, MouseListener {
 					arr[pair[0]][pair[1]] = -1;
 				}
 				ki.setDelete(false);
-			}	
+			}
 			if(ki.getSolve()) {
 				solveSudoku();
+				arr = initialList;
 				ki.setSolve(false);
 			}
 		}
+		
 	}
 	
 	/*
@@ -294,7 +303,7 @@ public class Sudoku extends Canvas implements Runnable, MouseListener {
 		return true;
 	}
 
-    private boolean solveSudoku()
+    public boolean solveSudoku()
     {
         int row=0;
         int col=0;
@@ -312,19 +321,19 @@ public class Sudoku extends Canvas implements Runnable, MouseListener {
             //the cell is matrix[row][col]
             if(isSafe(i, row, col))
             {
-                arr[row][col] = i;
+            	initialList[row][col] = i;
                 //backtracking
                 if(solveSudoku())
                     return true;
                 //if we can't proceed with this solution
                 //reassign the cell
-                arr[row][col]=-1;
+                initialList[row][col]=-1;
             }
         }
         return false;
     }
 	
-    private int[] numberUnassigned(int row, int col)
+    public int[] numberUnassigned(int row, int col)
     {
         int numunassign = 0;
         for(int i=0;i<9;i++)
@@ -332,7 +341,7 @@ public class Sudoku extends Canvas implements Runnable, MouseListener {
             for(int j=0;j<9;j++)
             {
                 //cell is unassigned
-                if(arr[i][j] == -1)
+                if(initialList[i][j] == -1)
                 {
                     //changing the values of row and col
                     row = i;
@@ -348,20 +357,20 @@ public class Sudoku extends Canvas implements Runnable, MouseListener {
         return a;
     }
 	
-    private boolean isSafe(int n, int r, int c)
+    public boolean isSafe(int n, int r, int c)
     {
         //checking in row
         for(int i=0;i<9;i++)
         {
             //there is a cell with same value
-            if(arr[r][i] == n)
+            if(initialList[r][i] == n)
                 return false;
         }
         //checking column
         for(int i=0;i<9;i++)
         {
             //there is a cell with the value equal to i
-            if(arr[i][c] == n)
+            if(initialList[i][c] == n)
                 return false;
         }
         //checking sub matrix
@@ -371,7 +380,7 @@ public class Sudoku extends Canvas implements Runnable, MouseListener {
         {
             for(int j=col_start;j<col_start+3;j++)
             {
-                if(arr[i][j]==n)
+                if(initialList[i][j]==n)
                     return false;
             }
         }
