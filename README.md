@@ -5,7 +5,7 @@ Sudoku GUI developed in Java
 and the program will accept it (green) if the number does not exist in its row and column. Otherwise, 
 it will appear red and you will be denied. 
 
-- press SPACE to solve sudoku and finish the board for any reason.
+- press SPACE to solve sudoku at the start of the game only.
 
 - press BACKSPACE to remove a non-initial cell.
 ```
