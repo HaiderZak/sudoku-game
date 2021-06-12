@@ -1,5 +1,4 @@
-# sudoku-game
-Sudoku game developed in Java
+Sudoku GUI developed in Java
 
 ``` 
 - SELECT a cell, CHOOSE a digit between 1 - 9, press ENTER,
