@@ -10,7 +10,7 @@ it will appear red and you will be denied.
 - press BACKSPACE to remove a non-initial cell.
 ```
 
-https://user-images.githubusercontent.com/37321974/121763239-70f1be00-cb08-11eb-934c-6f8a9a5b44bd.mp4
+https://user-images.githubusercontent.com/37321974/121787336-7f38ec00-cb93-11eb-9623-5d9a5bfedcaa.mp4
 
 How to play:
 
