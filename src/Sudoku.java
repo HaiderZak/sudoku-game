@@ -10,7 +10,9 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.imageio.ImageIO;
 
@@ -33,20 +35,20 @@ public class Sudoku extends Canvas implements Runnable, MouseListener {
 	private BufferedImage image;
 	private List<List<Integer>> badIndex;
 	private int[][] initialList;
-	
+
 	public Sudoku() {
 		new Main(this);
 		addMouseListener(this);
 		if(gameState == STATE.MENU) {
-	        URL resource = getClass().getResource("menu.png");
-	        try {
-	            image = ImageIO.read(resource);
-	        } catch (IOException e) {
-	            e.printStackTrace();
-	        }
+			URL resource = getClass().getResource("menu.png");
+			try {
+				image = ImageIO.read(resource);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 	}
-	
+
 	public void initBoard() {
 		if(gameState == STATE.PLAYING) {
 			ki = new KeyInput();
@@ -56,37 +58,37 @@ public class Sudoku extends Canvas implements Runnable, MouseListener {
 			blockHeight = this.getHeight() / 9;
 			allPairs = new ArrayList<List<Integer>>();
 			arr = new int[][] {{-1,-1,-1,-1,-1,-1,-1,-1,-1},{-1,-1,-1,-1,-1,-1,-1,-1,-1},{-1,-1,-1,-1,-1,-1,-1,-1,-1},
-							   {-1,-1,-1,-1,-1,-1,-1,-1,-1},{-1,-1,-1,-1,-1,-1,-1,-1,-1},{-1,-1,-1,-1,-1,-1,-1,-1,-1},
-							   {-1,-1,-1,-1,-1,-1,-1,-1,-1},{-1,-1,-1,-1,-1,-1,-1,-1,-1},{-1,-1,-1,-1,-1,-1,-1,-1,-1}};
-			badIndex = new ArrayList<List<Integer>>();
-			populateBoard();	
-			int c = 0;
-			for(int a=0; a<arr.length; a++) {
-				for(int b=0; b<arr.length; b++) {
-					if(arr[a][b] != -1) {
-						badIndex.add(new ArrayList<Integer>());
-						badIndex.get(c).add(a);
-						badIndex.get(c).add(b);
-						c++;
+				{-1,-1,-1,-1,-1,-1,-1,-1,-1},{-1,-1,-1,-1,-1,-1,-1,-1,-1},{-1,-1,-1,-1,-1,-1,-1,-1,-1},
+				{-1,-1,-1,-1,-1,-1,-1,-1,-1},{-1,-1,-1,-1,-1,-1,-1,-1,-1},{-1,-1,-1,-1,-1,-1,-1,-1,-1}};
+				badIndex = new ArrayList<List<Integer>>();
+				populateBoard();	
+				int c = 0;
+				for(int a=0; a<arr.length; a++) {
+					for(int b=0; b<arr.length; b++) {
+						if(arr[a][b] != -1) {
+							badIndex.add(new ArrayList<Integer>());
+							badIndex.get(c).add(a);
+							badIndex.get(c).add(b);
+							c++;
+						}
 					}
 				}
-			}
-			initialList = new int[9][9];
-			for(int a=0; a<arr.length; a++) {
-				for(int b=0; b<arr.length; b++) {
-					initialList[a][b] = arr[a][b];
+				initialList = new int[9][9];
+				for(int a=0; a<arr.length; a++) {
+					for(int b=0; b<arr.length; b++) {
+						initialList[a][b] = arr[a][b];
+					}
 				}
-			}
 		}
 	}
-	
+
 	public enum STATE {
 		MENU,
 		PLAYING
 	}
-	
+
 	public STATE gameState = STATE.MENU;
-	
+
 	// Initialization of board
 	public void populateBoard() {
 		arr[0][3] = 7;
@@ -118,14 +120,14 @@ public class Sudoku extends Canvas implements Runnable, MouseListener {
 		arr[8][4] = 3;
 		arr[8][5] = 7;
 	}
-	
+
 	public int getRandomNumber(int min, int max) {
-	    return (int) ((Math.random() * (max - min)) + min);
+		return (int) ((Math.random() * (max - min)) + min);
 	}
-	
+
 	public void mouseClicked(MouseEvent e) {
 	}
-	
+
 	public void mousePressed(MouseEvent e) {
 		if(gameState == STATE.MENU) {
 			if(e.getX() >= 237 && e.getX() <= 470 && e.getY() >= 334 && e.getY() <= 380) {
@@ -165,7 +167,7 @@ public class Sudoku extends Canvas implements Runnable, MouseListener {
 		thread.start();
 		running = true;
 	}
-	
+
 	public synchronized void stop() {
 		try {
 			thread.join();
@@ -175,7 +177,7 @@ public class Sudoku extends Canvas implements Runnable, MouseListener {
 			e.printStackTrace();
 		}
 	}
-	
+
 	@Override
 	public void run() {
 		long lastTime = System.nanoTime();
@@ -183,22 +185,22 @@ public class Sudoku extends Canvas implements Runnable, MouseListener {
 		double ns = 1000000000 / amountOfTicks;
 		double delta = 0;
 		long timer = System.currentTimeMillis();
-		
+
 		while(running) {
 			long now = System.nanoTime();
 			delta += (now - lastTime) / ns;
 			lastTime = now;
-			
+
 			if(delta >= 1) {
 				tick();
 				delta--;
 			}
 			render();
-	
+
 			if(System.currentTimeMillis() - timer > 1000) {
 				timer += 1000;
 			}
-			
+
 		}
 		stop();			
 	}
@@ -249,9 +251,9 @@ public class Sudoku extends Canvas implements Runnable, MouseListener {
 				ki.setSolve(false);
 			}
 		}
-		
+
 	}
-	
+
 	/*
 	 * Algorithm to find duplicates in a 1-dimensional integer list
 	 * @param inputArray
@@ -259,23 +261,24 @@ public class Sudoku extends Canvas implements Runnable, MouseListener {
 	 */
 	private boolean findDuplicates(int[] inputArray)
 	{
-	    for(int i=0; i<inputArray.length; i++) {
-	    	for(int j=i+1; j<inputArray.length; j++) {
-	    		if(inputArray[i] != -1 && inputArray[i] == inputArray[j]) {
-	    			return true;		
-	    		}
-	    	}
-	    }
-	    return false;
+		for(int i=0; i<inputArray.length; i++) {
+			for(int j=i+1; j<inputArray.length; j++) {
+				if(inputArray[i] != -1 && inputArray[i] == inputArray[j]) {
+					return true;		
+				}
+			}
+		}
+		return false;
 	}
-	
-	
+
+
 	/*
 	 * Searches through rows and columns of 2D list to find duplicate values
 	 * @param lst Current integers on board
 	 * @return boolean
 	 */
 	public boolean isValid(int[][] lst) {
+		// Check Columns
 		int l = 0;
 		for(int i=0; i<lst.length; i++) {
 			int[] colList = new int[lst.length];
@@ -288,6 +291,7 @@ public class Sudoku extends Canvas implements Runnable, MouseListener {
 			}
 			l=0;
 		}
+		// Check Rows
 		int g = 0;
 		for(int i=0; i<lst.length; i++) {
 			int[] rowList = new int[lst[i].length];
@@ -300,93 +304,108 @@ public class Sudoku extends Canvas implements Runnable, MouseListener {
 			}
 			g=0;
 		}
+		// Check Subsquares
+		for (int row = 0 ; row < 9; row = row + 3) {
+			for (int col = 0; col < 9; col = col + 3) {
+				Set<Integer>set = new HashSet<Integer>();
+				for(int r = row; r < row+3; r++) {
+					for(int c= col; c < col+3; c++){
+						if (lst[r][c] != -1){
+							if (set.add(lst[r][c]) == false) {
+								return false;
+							}
+						}
+					}
+				}
+			}
+		}
 		return true;
 	}
 
-    public boolean solveSudoku()
-    {
-        int row=0;
-        int col=0;
-        int[] a = numberUnassigned(row, col);
-        //if all cells are assigned then the sudoku is already solved
-        //pass by reference because number_unassigned will change the values of row and col
-        if(a[0] == 0)
-            return true;
-        //number between 1 to 9
-        row = a[1];
-        col = a[2];
-        for(int i=1;i<=9;i++)
-        {
-            //if we can assign i to the cell or not
-            //the cell is matrix[row][col]
-            if(isSafe(i, row, col))
-            {
-            	initialList[row][col] = i;
-                //backtracking
-                if(solveSudoku())
-                    return true;
-                //if we can't proceed with this solution
-                //reassign the cell
-                initialList[row][col]=-1;
-            }
-        }
-        return false;
-    }
-	
-    public int[] numberUnassigned(int row, int col)
-    {
-        int numunassign = 0;
-        for(int i=0;i<9;i++)
-        {
-            for(int j=0;j<9;j++)
-            {
-                //cell is unassigned
-                if(initialList[i][j] == -1)
-                {
-                    //changing the values of row and col
-                    row = i;
-                    col = j;
-                    //there is one or more unassigned cells
-                    numunassign = 1;
-                    int[] a = {numunassign, row, col};
-                    return a;
-                }
-            }
-        }
-        int[] a = {numunassign, -1, -1};
-        return a;
-    }
-	
-    public boolean isSafe(int n, int r, int c)
-    {
-        //checking in row
-        for(int i=0;i<9;i++)
-        {
-            //there is a cell with same value
-            if(initialList[r][i] == n)
-                return false;
-        }
-        //checking column
-        for(int i=0;i<9;i++)
-        {
-            //there is a cell with the value equal to i
-            if(initialList[i][c] == n)
-                return false;
-        }
-        //checking sub matrix
-        int row_start = (r/3)*3;
-        int col_start = (c/3)*3;
-        for(int i=row_start;i<row_start+3;i++)
-        {
-            for(int j=col_start;j<col_start+3;j++)
-            {
-                if(initialList[i][j]==n)
-                    return false;
-            }
-        }
-        return true;
-    }
-	
+	public boolean solveSudoku()
+	{
+		int row=0;
+		int col=0;
+		int[] a = numberUnassigned(row, col);
+		//if all cells are assigned then the sudoku is already solved
+		//pass by reference because number_unassigned will change the values of row and col
+		if(a[0] == 0)
+			return true;
+		//number between 1 to 9
+		row = a[1];
+		col = a[2];
+		for(int i=1;i<=9;i++)
+		{
+			//if we can assign i to the cell or not
+			//the cell is matrix[row][col]
+			if(isSafe(i, row, col))
+			{
+				initialList[row][col] = i;
+				//backtracking
+				if(solveSudoku())
+					return true;
+				//if we can't proceed with this solution
+				//reassign the cell
+				initialList[row][col]=-1;
+			}
+		}
+		return false;
+	}
+
+	public int[] numberUnassigned(int row, int col)
+	{
+		int numunassign = 0;
+		for(int i=0;i<9;i++)
+		{
+			for(int j=0;j<9;j++)
+			{
+				//cell is unassigned
+				if(initialList[i][j] == -1)
+				{
+					//changing the values of row and col
+					row = i;
+					col = j;
+					//there is one or more unassigned cells
+					numunassign = 1;
+					int[] a = {numunassign, row, col};
+					return a;
+				}
+			}
+		}
+		int[] a = {numunassign, -1, -1};
+		return a;
+	}
+
+	public boolean isSafe(int n, int r, int c)
+	{
+		//checking in row
+		for(int i=0;i<9;i++)
+		{
+			//there is a cell with same value
+			if(initialList[r][i] == n)
+				return false;
+		}
+		//checking column
+		for(int i=0;i<9;i++)
+		{
+			//there is a cell with the value equal to i
+			if(initialList[i][c] == n)
+				return false;
+		}
+		//checking sub matrix
+		int row_start = (r/3)*3;
+		int col_start = (c/3)*3;
+		for(int i=row_start;i<row_start+3;i++)
+		{
+			for(int j=col_start;j<col_start+3;j++)
+			{
+				if(initialList[i][j]==n)
+					return false;
+			}
+		}
+		return true;
+	}
+
 	public void render() {
 		BufferStrategy bs = this.getBufferStrategy();
 		if(bs == null) {
@@ -394,12 +413,12 @@ public class Sudoku extends Canvas implements Runnable, MouseListener {
 			return;
 		}
 		Graphics g = bs.getDrawGraphics();
-		
+
 		// DRAW BOARD
-		
+
 		g.setColor(Color.WHITE);
 		g.fillRect(0, 0, 710, 580);
-		
+
 		if(gameState == STATE.MENU) {
 			g.drawImage(image, 0, 0, this);
 		}
@@ -427,9 +446,9 @@ public class Sudoku extends Canvas implements Runnable, MouseListener {
 				}
 				j++;
 			}
-			
+
 			//Draw gray boxes 
-			
+
 			g.setColor(Color.LIGHT_GRAY);
 			for(int r=0; r<badIndex.size(); r++) {
 				if((badIndex.get(r).get(0) == 2 && badIndex.get(r).get(1) == 2) || (badIndex.get(r).get(0) == 5 && badIndex.get(r).get(1) == 2) || 
@@ -446,8 +465,8 @@ public class Sudoku extends Canvas implements Runnable, MouseListener {
 					g.fillRect(badIndex.get(r).get(0) * blockWidth+1, badIndex.get(r).get(1) * blockHeight+1, blockWidth-1, blockHeight-1);		
 				}
 			}
-			
-			
+
+
 			// Draw selected boxes onto screen
 			g.setColor(Color.BLACK);
 			g.setFont(new Font("Arial", Font.PLAIN, 35)); 
@@ -471,7 +490,7 @@ public class Sudoku extends Canvas implements Runnable, MouseListener {
 					g.drawRect(pair[0] * blockWidth+1, pair[1] * blockHeight+1, blockWidth-2, blockHeight-2);		
 					boxType = 4;
 				}
-				
+
 				if(checkValid == 2) {
 					if(boxType == 1) {
 						g.fillRect(pair[0] * blockWidth+1, pair[1] * blockHeight+1, blockWidth-3, blockHeight-3);						
@@ -506,7 +525,7 @@ public class Sudoku extends Canvas implements Runnable, MouseListener {
 						g.fillRect(pair[0] * blockWidth+1, pair[1] * blockHeight+1, blockWidth-1, blockHeight-1);							
 					}
 				}
-				
+
 				g.setColor(Color.BLACK);
 				if(same) {
 					g.drawString(ki.getNum(), pair[0] * blockWidth + 29,  pair[1] * blockHeight + 42);
@@ -518,7 +537,7 @@ public class Sudoku extends Canvas implements Runnable, MouseListener {
 					same = true;
 				}
 			}
-	
+
 			for(int row=0; row<9; row++) {
 				for(int col=0; col<9; col++) {
 					if(arr[row][col] != -1) {
@@ -527,46 +546,46 @@ public class Sudoku extends Canvas implements Runnable, MouseListener {
 				}
 			}		
 		}
-		
+
 		g.dispose();
 		bs.show();
 	}
-	
+
 	public int[] getBlockFromMouse(int x, int y){
 		return new int[] {x / blockWidth, y / blockHeight};
 	}
-	
+
 	//https://www.rgagnon.com/javadetails/java-0260.html => For drawing thicker lines in Java Graphics
-	 public void drawThickLine(Graphics g, int x1, int y1, int x2, int y2, int thickness, Color c) {
-			  // The thick line is in fact a filled polygon
-			  g.setColor(c);
-			  int dX = x2 - x1;
-			  int dY = y2 - y1;
-			  // line length
-			  double lineLength = Math.sqrt(dX * dX + dY * dY);
+	public void drawThickLine(Graphics g, int x1, int y1, int x2, int y2, int thickness, Color c) {
+		// The thick line is in fact a filled polygon
+		g.setColor(c);
+		int dX = x2 - x1;
+		int dY = y2 - y1;
+		// line length
+		double lineLength = Math.sqrt(dX * dX + dY * dY);
 
-			  double scale = (double)(thickness) / (2 * lineLength);
+		double scale = (double)(thickness) / (2 * lineLength);
 
-			  // The x,y increments from an endpoint needed to create a rectangle...
-			  double ddx = -scale * (double)dY;
-			  double ddy = scale * (double)dX;
-			  ddx += (ddx > 0) ? 0.5 : -0.5;
-			  ddy += (ddy > 0) ? 0.5 : -0.5;
-			  int dx = (int)ddx;
-			  int dy = (int)ddy;
+		// The x,y increments from an endpoint needed to create a rectangle...
+		double ddx = -scale * (double)dY;
+		double ddy = scale * (double)dX;
+		ddx += (ddx > 0) ? 0.5 : -0.5;
+		ddy += (ddy > 0) ? 0.5 : -0.5;
+		int dx = (int)ddx;
+		int dy = (int)ddy;
 
-			  // Now we can compute the corner points...
-			  int xPoints[] = new int[4];
-			  int yPoints[] = new int[4];
+		// Now we can compute the corner points...
+		int xPoints[] = new int[4];
+		int yPoints[] = new int[4];
 
-			  xPoints[0] = x1 + dx; yPoints[0] = y1 + dy;
-			  xPoints[1] = x1 - dx; yPoints[1] = y1 - dy;
-			  xPoints[2] = x2 - dx; yPoints[2] = y2 - dy;
-			  xPoints[3] = x2 + dx; yPoints[3] = y2 + dy;
+		xPoints[0] = x1 + dx; yPoints[0] = y1 + dy;
+		xPoints[1] = x1 - dx; yPoints[1] = y1 - dy;
+		xPoints[2] = x2 - dx; yPoints[2] = y2 - dy;
+		xPoints[3] = x2 + dx; yPoints[3] = y2 + dy;
 
-			  g.fillPolygon(xPoints, yPoints, 4);
-	 }
-	
+		g.fillPolygon(xPoints, yPoints, 4);
+	}
+
 	public static void main(String[] args) {
 		new Sudoku();
 	}
