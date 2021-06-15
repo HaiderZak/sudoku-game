@@ -2,7 +2,7 @@ Sudoku GUI developed in Java
 
 ``` 
 - SELECT a cell, CHOOSE a digit between 1 - 9, press ENTER,
-and the program will accept it (green) if the number does not exist in its row and column. Otherwise, 
+and the program will accept it (green) if the number does not exist in its row, column and subsquare. Otherwise, 
 it will appear red and you will be denied. 
 
 - press SPACE to solve sudoku at any point in the game.
